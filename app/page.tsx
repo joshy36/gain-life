@@ -1,12 +1,12 @@
 'use client';
 
 import { useAppSelector, useAppDispatch } from '@/lib/store';
-import { playMove, reset } from '@/lib/store/slices/board.slice';
+import { playMove, reset, setBoardSize } from '@/lib/store/slices/board.slice';
+import { Slider } from '@/components/ui/slider';
 
 export default function Home() {
-  const { board, validMoves, current, totalBlack, totalWhite } = useAppSelector(
-    (state) => state.board
-  );
+  const { board, validMoves, current, totalBlack, totalWhite, boardSize } =
+    useAppSelector((state) => state.board);
   const dispatch = useAppDispatch();
 
   return (
@@ -48,18 +48,44 @@ export default function Home() {
                 ? 'Black'
                 : totalWhite > totalBlack
                 ? 'White'
-                : 'Draw'}{' '}
-              wins!
+                : "It's a tie!"}
             </p>
           </div>
         )}
+
+        <div className="w-full max-w-md mx-auto mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm text-zinc-400">Board Size</label>
+            <span className="text-sm font-medium">
+              {boardSize}x{boardSize}
+            </span>
+          </div>
+          <Slider
+            value={[boardSize]}
+            min={4}
+            max={12}
+            step={2}
+            onValueChange={([value]) => dispatch(setBoardSize(value))}
+            className="w-full"
+          />
+        </div>
+
+        <button
+          onClick={() => dispatch(reset())}
+          className="mt-4 w-full rounded bg-zinc-700 px-3 py-1 cursor-pointer hover:bg-zinc-600 transition-colors"
+        >
+          Reset Game
+        </button>
       </div>
 
-      <div className="grid grid-cols-8 gap-0.5">
+      <div
+        className={`grid gap-0.5 w-full max-w-[600px]`}
+        style={{ gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))` }}
+      >
         {board.map((row, rowIndex) =>
           row.map((piece, colIndex) => (
-            <div key={`${colIndex}-${rowIndex}`}>
-              <div className="w-16 h-16 bg-green-700 flex items-center justify-center">
+            <div key={`${colIndex}-${rowIndex}`} className="aspect-square">
+              <div className="w-full h-full bg-green-700 flex items-center justify-center">
                 {validMoves[rowIndex][colIndex] ? (
                   <button
                     onClick={() =>
@@ -68,7 +94,7 @@ export default function Home() {
                     className="w-full h-full flex items-center justify-center cursor-pointer"
                   >
                     <div
-                      className={`w-14 h-14 rounded-full border-2 border-dashed ${
+                      className={`w-[90%] h-[90%] rounded-full border-2 border-dashed ${
                         current === 'B' ? 'border-black/60' : 'border-white/60'
                       } flex items-center justify-center`}
                     />
@@ -76,7 +102,7 @@ export default function Home() {
                 ) : (
                   piece && (
                     <div
-                      className={`w-14 h-14 rounded-full ${
+                      className={`w-[90%] h-[90%] rounded-full ${
                         piece === 'B' ? 'bg-black' : 'bg-white'
                       }`}
                     />
@@ -87,13 +113,6 @@ export default function Home() {
           ))
         )}
       </div>
-
-      <button
-        onClick={() => dispatch(reset())}
-        className="mt-4 rounded bg-zinc-700 px-3 py-1 cursor-pointer"
-      >
-        Reset
-      </button>
     </main>
   );
 }

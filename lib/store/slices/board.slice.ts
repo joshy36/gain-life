@@ -14,31 +14,39 @@ export interface BoardState {
   current: 'B' | 'W';
   totalWhite: number;
   totalBlack: number;
+  boardSize: number;
 }
 
-const initialBoard = Array.from({ length: 8 }, (_, y) =>
-  Array.from({ length: 8 }, (_, x) =>
-    (y === 3 && x === 3) || (y === 4 && x === 4)
-      ? 'W'
-      : (y === 3 && x === 4) || (y === 4 && x === 3)
-      ? 'B'
-      : null
-  )
-);
+const createInitialBoard = (size: number) => {
+  const half = size / 2;
+  return Array.from({ length: size }, (_, y) =>
+    Array.from({ length: size }, (_, x) =>
+      (y === half - 1 && x === half - 1) || (y === half && x === half)
+        ? 'W'
+        : (y === half - 1 && x === half) || (y === half && x === half - 1)
+        ? 'B'
+        : null
+    )
+  );
+};
 
-const initialState: BoardState = {
-  board: initialBoard,
+const createInitialState = (size: number): BoardState => ({
+  board: createInitialBoard(size),
   current: 'B',
   totalWhite: 2,
   totalBlack: 2,
+  boardSize: size,
   validMoves: generateValidMoves({
-    board: initialBoard,
+    board: createInitialBoard(size),
     current: 'B',
     totalWhite: 2,
     totalBlack: 2,
-    validMoves: Array.from({ length: 8 }, () => Array(8).fill(false)),
+    boardSize: size,
+    validMoves: Array.from({ length: size }, () => Array(size).fill(false)),
   }),
-};
+});
+
+const initialState = createInitialState(8);
 
 const boardSlice = createSlice({
   name: 'board',
@@ -58,10 +66,18 @@ const boardSlice = createSlice({
       state.validMoves = generateValidMoves(state);
     },
     reset(state) {
-      Object.assign(state, initialState);
+      const newState = createInitialState(state.boardSize);
+      Object.assign(state, newState);
+    },
+    setBoardSize(state, action: PayloadAction<number>) {
+      const newSize = action.payload;
+      if (newSize % 2 !== 0) return;
+
+      const newState = createInitialState(newSize);
+      Object.assign(state, newState);
     },
   },
 });
 
-export const { playMove, reset } = boardSlice.actions;
+export const { playMove, reset, setBoardSize } = boardSlice.actions;
 export default boardSlice.reducer;
