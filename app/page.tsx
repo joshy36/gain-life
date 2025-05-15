@@ -1,14 +1,12 @@
 'use client';
 
-import { useAppSelector, useAppDispatch, RootState } from '@/lib/store';
+import { useAppSelector, useAppDispatch } from '@/lib/store';
 import { playMove, reset } from '@/lib/store/slices/board.slice';
 
 export default function Home() {
-  const board = useAppSelector((state: RootState) => state.board.board);
-  const validMoves = useAppSelector(
-    (state: RootState) => state.board.validMoves
+  const { board, validMoves, current, totalBlack, totalWhite } = useAppSelector(
+    (state) => state.board
   );
-  const current = useAppSelector((state: RootState) => state.board.current);
   const dispatch = useAppDispatch();
 
   return (
@@ -19,7 +17,7 @@ export default function Home() {
             <div className={'w-12 h-12 rounded-full bg-black shadow-inner'} />
             <div className="flex flex-col items-center">
               <p className="text-sm text-zinc-400">Black</p>
-              <p className="text-2xl font-bold">10</p>
+              <p className="text-2xl font-bold">{totalBlack}</p>
             </div>
           </div>
 
@@ -27,20 +25,34 @@ export default function Home() {
             <div className={'w-12 h-12 rounded-full bg-white shadow-inner'} />
             <div className="flex flex-col items-center">
               <p className="text-sm text-zinc-400">White</p>
-              <p className="text-2xl font-bold">5</p>
+              <p className="text-2xl font-bold">{totalWhite}</p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-3 bg-zinc-700/50 py-2 px-4 rounded-md">
-          <p className="text-sm text-zinc-300">Current turn:</p>
-          <div
-            className={`w-5 h-5 rounded-full ${
-              current === 'B' ? 'bg-black' : 'bg-white'
-            } shadow-inner`}
-          />
-          <p className="font-medium">{current === 'B' ? 'Black' : 'White'}</p>
-        </div>
+        {validMoves.some((row) => row.some((cell) => cell)) ? (
+          <div className="flex items-center justify-center gap-3 bg-zinc-700/50 py-2 px-4 rounded-md">
+            <p className="text-sm text-zinc-300">Current turn:</p>
+            <div
+              className={`w-5 h-5 rounded-full ${
+                current === 'B' ? 'bg-black' : 'bg-white'
+              } shadow-inner`}
+            />
+            <p className="font-medium">{current === 'B' ? 'Black' : 'White'}</p>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-3 bg-zinc-700/50 py-2 px-4 rounded-md">
+            <p className="text-sm text-zinc-300">Game Over</p>
+            <p className="font-medium">
+              {totalBlack > totalWhite
+                ? 'Black'
+                : totalWhite > totalBlack
+                ? 'White'
+                : 'Draw'}{' '}
+              wins!
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-8 gap-0.5">
@@ -53,7 +65,7 @@ export default function Home() {
                     onClick={() =>
                       dispatch(playMove({ x: colIndex, y: rowIndex }))
                     }
-                    className="w-full h-full flex items-center justify-center"
+                    className="w-full h-full flex items-center justify-center cursor-pointer"
                   >
                     <div
                       className={`w-14 h-14 rounded-full border-2 border-dashed ${

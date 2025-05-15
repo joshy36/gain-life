@@ -1,15 +1,7 @@
 import { BoardState } from '../store/slices/board.slice';
+import { checkBounds, directions } from './utils';
 
-const checkBounds = (state: BoardState, row: number, col: number): boolean => {
-  return (
-    row >= 0 &&
-    row < state.board.length &&
-    col >= 0 &&
-    col < state.board[0].length
-  );
-};
-
-const checkDirection = (
+export const checkDirection = (
   state: BoardState,
   row: number,
   col: number,
@@ -43,17 +35,6 @@ const checkDirection = (
 
 const isValid = (state: BoardState, row: number, col: number): boolean => {
   if (state.board[row][col] !== null) return false;
-
-  const directions = [
-    [0, 1], // right
-    [1, 1], // down-right
-    [1, 0], // down
-    [1, -1], // down-left
-    [0, -1], // left
-    [-1, -1], // up-left
-    [-1, 0], // up
-    [-1, 1], // up-right
-  ];
 
   return directions.some(([rowDir, colDir]) =>
     checkDirection(state, row, col, rowDir, colDir)

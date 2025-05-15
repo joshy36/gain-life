@@ -1,4 +1,5 @@
 import { generateValidMoves } from '@/lib/engine/generateValidMoves';
+import { flipPieces } from '@/lib/engine/flipPieces';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type Piece = 'B' | 'W' | null;
@@ -47,8 +48,13 @@ const boardSlice = createSlice({
       const { x, y } = action.payload;
 
       state.board[y][x] = state.current;
+      if (state.current == 'B') {
+        state.totalBlack++;
+      } else {
+        state.totalWhite++;
+      }
+      flipPieces(state, x, y);
       state.current = state.current === 'B' ? 'W' : 'B';
-      // TODO: flip pieces …
       state.validMoves = generateValidMoves(state);
     },
     reset(state) {
