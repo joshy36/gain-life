@@ -1,6 +1,6 @@
 import { useAppSelector, useAppDispatch } from '@/lib/store';
 import { playMove } from '@/lib/store/slices/boardSlice';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export function useAIMove(gameMode: 'local' | 'ai') {
   const { board, validMoves, current, scores, boardSize } = useAppSelector(
@@ -9,7 +9,7 @@ export function useAIMove(gameMode: 'local' | 'ai') {
   const dispatch = useAppDispatch();
   const [isAILoading, setIsAILoading] = useState(false);
 
-  const handleAIMove = async () => {
+  const handleAIMove = useCallback(async () => {
     try {
       setIsAILoading(true);
       let attempts = 0;
@@ -32,7 +32,7 @@ ${board.map((row) => row.map((cell) => cell || '.').join(' ')).join('\n')}
 
 Valid Moves (marked with 'V'):
 ${validMoves
-  .map((row, y) => row.map((isValid, x) => (isValid ? 'V' : '.')).join(' '))
+  .map((row) => row.map((isValid) => (isValid ? 'V' : '.')).join(' '))
   .join('\n')}
 
 ${
@@ -89,7 +89,7 @@ Consider:
     } finally {
       setIsAILoading(false);
     }
-  };
+  }, [board, boardSize, current, scores, validMoves, dispatch, setIsAILoading]);
 
   useEffect(() => {
     if (
@@ -99,7 +99,7 @@ Consider:
     ) {
       handleAIMove();
     }
-  }, [gameMode, current, validMoves]);
+  }, [gameMode, current, validMoves, handleAIMove]);
 
   return { isAILoading };
 }
