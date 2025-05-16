@@ -3,6 +3,7 @@ import { flipPieces } from '@/lib/engine/flipPieces';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type Piece = 'B' | 'W' | null;
+export type Current = 'B' | 'W';
 export interface Point {
   x: number;
   y: number;
@@ -11,7 +12,7 @@ export interface Point {
 export interface BoardState {
   board: Piece[][];
   validMoves: boolean[][];
-  current: 'B' | 'W';
+  current: Current;
   totalWhite: number;
   totalBlack: number;
   boardSize: number;
