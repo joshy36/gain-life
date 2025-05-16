@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import boardReducer from './slices/board.slice';
+import boardReducer from './slices/boardSlice';
 
 export const store = configureStore({
   reducer: {

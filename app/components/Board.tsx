@@ -1,5 +1,6 @@
 import { useAppDispatch } from '@/lib/store';
-import { Current, Piece, playMove } from '@/lib/store/slices/board.slice';
+import { Current, Piece, playMove } from '@/lib/store/slices/boardSlice';
+import { playerPieceColors, playerBorderColors } from '../utils/colors';
 
 interface BoardProps {
   gameMode: 'local' | 'ai';
@@ -40,7 +41,7 @@ export function Board({
                 >
                   <div
                     className={`w-[90%] h-[90%] rounded-full border-2 border-dashed ${
-                      current === 'B' ? 'border-black/60' : 'border-white/60'
+                      playerBorderColors[current] || 'border-gray-300'
                     } flex items-center justify-center`}
                   />
                 </button>
@@ -48,7 +49,7 @@ export function Board({
                 piece && (
                   <div
                     className={`w-[90%] h-[90%] rounded-full ${
-                      piece === 'B' ? 'bg-black' : 'bg-white'
+                      playerPieceColors[piece] || 'bg-gray-300'
                     }`}
                   />
                 )

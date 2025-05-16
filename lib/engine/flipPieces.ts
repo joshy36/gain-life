@@ -1,52 +1,19 @@
-import { BoardState } from '@/lib/store/slices/board.slice';
-import { checkBounds, directions } from './utils';
-
-const checkDirection = (
-  state: BoardState,
-  row: number,
-  col: number,
-  rowDir: number,
-  colDir: number
-): [number, number][] => {
-  const opponent = state.current === 'B' ? 'W' : 'B';
-  row += rowDir;
-  col += colDir;
-
-  const piecesToFlip: [number, number][] = [];
-
-  while (checkBounds(state, row, col)) {
-    const cell = state.board[row][col];
-
-    if (cell === null) return [];
-    if (cell === opponent) {
-      piecesToFlip.push([col, row]);
-    } else if (cell === state.current) {
-      return piecesToFlip;
-    } else {
-      return [];
-    }
-
-    row += rowDir;
-    col += colDir;
-  }
-
-  return [];
-};
+import { BoardState, Piece } from '@/lib/store/slices/boardSlice';
+import { checkDirection, directions } from './utils';
 
 export function flipPieces(state: BoardState, x: number, y: number): void {
-  const { board, current } = state;
+  const { board, current, scores } = state;
 
   for (const [dx, dy] of directions) {
-    const piecesToFlip = checkDirection(state, y, x, dy, dx);
+    const piecesInDirectionToFlip = checkDirection(state, y, x, dy, dx);
 
-    for (const [flipX, flipY] of piecesToFlip) {
-      board[flipY][flipX] = current;
-      if (current === 'B') {
-        state.totalBlack++;
-        state.totalWhite--;
-      } else {
-        state.totalWhite++;
-        state.totalBlack--;
+    for (const [flipX, flipY] of piecesInDirectionToFlip) {
+      const originalPieceColor = board[flipY][flipX] as Piece;
+
+      if (originalPieceColor && originalPieceColor !== current) {
+        board[flipY][flipX] = current;
+        scores[current]++;
+        scores[originalPieceColor]--;
       }
     }
   }

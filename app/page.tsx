@@ -1,7 +1,12 @@
 'use client';
 
 import { useAppSelector, useAppDispatch } from '@/lib/store';
-import { reset, setBoardSize } from '@/lib/store/slices/board.slice';
+import {
+  reset,
+  setBoardSize,
+  setNumberOfPlayers,
+  Current,
+} from '@/lib/store/slices/boardSlice';
 import {
   Tabs,
   TabsList,
@@ -15,10 +20,18 @@ import { GameControls } from '@/app/components/GameControls';
 import { ScoreDisplay } from '@/app/components/ScoreDisplay';
 import { GameStatus } from '@/app/components/GameStatus';
 import { useAIMove } from '@/app/hooks/useAIMove';
+import { colorMapping } from './utils/colors';
 
 export default function Home() {
-  const { validMoves, current, totalBlack, totalWhite, board, boardSize } =
-    useAppSelector((state) => state.board);
+  const {
+    validMoves,
+    current,
+    scores,
+    board,
+    boardSize,
+    players,
+    numberOfPlayers,
+  } = useAppSelector((state) => state.board);
   const dispatch = useAppDispatch();
   const [gameMode, setGameMode] = useState<'local' | 'ai'>('local');
   const { isAILoading } = useAIMove(gameMode);
@@ -27,11 +40,32 @@ export default function Home() {
 
   const handleBoardSizeChange = (size: number) => {
     dispatch(setBoardSize(size));
+    if (size <= 6 && numberOfPlayers > 2) {
+      dispatch(setNumberOfPlayers(2));
+    }
   };
 
   const handleReset = () => {
     dispatch(reset());
   };
+
+  const handleNumberOfPlayersChange = (numPlayers: number) => {
+    dispatch(setNumberOfPlayers(numPlayers));
+  };
+
+  let orderedPlayersForDisplay: Current[];
+  let playerDisplayNames: Partial<Record<Current, string>>;
+
+  if (gameMode === 'local') {
+    orderedPlayersForDisplay = players.slice(0, numberOfPlayers);
+    playerDisplayNames = {};
+    orderedPlayersForDisplay.forEach((p) => {
+      playerDisplayNames[p] = colorMapping[p] || p;
+    });
+  } else {
+    orderedPlayersForDisplay = ['B', 'W'];
+    playerDisplayNames = { B: 'You', W: 'AI' };
+  }
 
   return (
     <main className="flex flex-col items-center gap-4 p-8">
@@ -40,7 +74,11 @@ export default function Home() {
           defaultValue="local"
           className="w-full"
           onValueChange={(value) => {
-            setGameMode(value as 'local' | 'ai');
+            const newGameMode = value as 'local' | 'ai';
+            setGameMode(newGameMode);
+            if (newGameMode === 'ai') {
+              dispatch(setNumberOfPlayers(2));
+            }
             dispatch(reset());
           }}
         >
@@ -62,44 +100,50 @@ export default function Home() {
           </TabsList>
           <TabsContent value="local">
             <ScoreDisplay
-              totalBlack={totalBlack}
-              totalWhite={totalWhite}
-              blackLabel="Black"
-              whiteLabel="White"
+              scores={scores}
+              orderedPlayers={orderedPlayersForDisplay}
+              playerDisplayNames={playerDisplayNames}
             />
             <GameStatus
               current={current}
               isAILoading={isAILoading}
               gameMode={gameMode}
-              totalBlack={totalBlack}
-              totalWhite={totalWhite}
+              scores={scores}
+              orderedPlayers={orderedPlayersForDisplay}
               hasValidMoves={hasValidMoves}
+              playerDisplayNames={playerDisplayNames}
             />
             <GameControls
               boardSize={boardSize}
               onBoardSizeChange={handleBoardSizeChange}
               onReset={handleReset}
+              numberOfPlayers={numberOfPlayers}
+              onNumberOfPlayersChange={handleNumberOfPlayersChange}
+              gameMode="local"
             />
           </TabsContent>
           <TabsContent value="ai">
             <ScoreDisplay
-              totalBlack={totalBlack}
-              totalWhite={totalWhite}
-              blackLabel="You"
-              whiteLabel="AI"
+              scores={scores}
+              orderedPlayers={orderedPlayersForDisplay}
+              playerDisplayNames={playerDisplayNames}
             />
             <GameStatus
               current={current}
               isAILoading={isAILoading}
               gameMode={gameMode}
-              totalBlack={totalBlack}
-              totalWhite={totalWhite}
+              scores={scores}
+              orderedPlayers={orderedPlayersForDisplay}
               hasValidMoves={hasValidMoves}
+              playerDisplayNames={playerDisplayNames}
             />
             <GameControls
               boardSize={boardSize}
               onBoardSizeChange={handleBoardSizeChange}
               onReset={handleReset}
+              numberOfPlayers={2}
+              onNumberOfPlayersChange={() => {}}
+              gameMode="ai"
             />
           </TabsContent>
         </Tabs>

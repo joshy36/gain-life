@@ -1,10 +1,11 @@
 import { useAppSelector, useAppDispatch } from '@/lib/store';
-import { playMove } from '@/lib/store/slices/board.slice';
+import { playMove } from '@/lib/store/slices/boardSlice';
 import { useState, useEffect } from 'react';
 
 export function useAIMove(gameMode: 'local' | 'ai') {
-  const { board, validMoves, current, totalBlack, totalWhite, boardSize } =
-    useAppSelector((state) => state.board);
+  const { board, validMoves, current, scores, boardSize } = useAppSelector(
+    (state) => state.board
+  );
   const dispatch = useAppDispatch();
   const [isAILoading, setIsAILoading] = useState(false);
 
@@ -25,7 +26,7 @@ export function useAIMove(gameMode: 'local' | 'ai') {
             prompt: `You are playing a game of Othello/Reversi. Here is the current board state:
 Board Size: ${boardSize}x${boardSize}
 Current Player: ${current === 'B' ? 'Black' : 'White'}
-Score - Black: ${totalBlack}, White: ${totalWhite}
+Score - Black: ${scores['B']}, White: ${scores['W']}
 Board State:
 ${board.map((row) => row.map((cell) => cell || '.').join(' ')).join('\n')}
 
